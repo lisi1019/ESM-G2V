@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ESM-G2V
 
  A dual-input deep learning tool  for protein function annotation, combining sequence-based features(via ESM embeddings) and genomic context features (via Gene2Vec embeddings). Predicts  KEGG Orthology (KO) terms by jointly modeling protein sequences and their genomic neighborhoods, enabling accurate metabolic pathway inference.
@@ -42,6 +41,4 @@ To retrain and validate the model, run the following command:
 The metadata file can be found in metadata.csv and The Merge_MDL can be found in merged_data.txt.
 
 
-=======
-# ESM-G2V
->>>>>>> a8dc0e745d83f2164c71b702a7edb6af8569f796
+
