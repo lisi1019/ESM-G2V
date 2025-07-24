@@ -1,0 +1,160 @@
+import os
+from datetime import datetime
+import glob
+
+
+
+RAW_GFF_DIR = "/root/fsas/ESM-G2V/Data/Example/raw_files/raw_gff"
+RAW_FAA_DIR = "/root/fsas/ESM-G2V/Data/Example/raw_files/raw_faa"
+
+
+DEAL_GFF_DIR = "/root/fsas/ESM-G2V/Data/Example/deal_raw_data/deal_raw_gff"
+MERGED_FAA = "/root/fsas/ESM-G2V/Data/Example/deal_raw_data/merged.faa"
+ANNOTATION_RESULT = "/root/fsas/ESM-G2V/Data/Example/KO_identifiers/ko_annotation.txt"
+CLUSTER_RESULT = "/root/fsas/ESM-G2V/Data/Example/KO_identifiers/clusterRes_all_seqs.fasta"
+CLUSTER_TXT = "/root/fsas/ESM-G2V/Data/Example/KO_identifiers/clusterRes_ID.txt"
+CLUSTER_OUTPUT = "/root/fsas/ESM-G2V/Data/Example/KO_identifiers/clusterRes_mapping.txt"
+
+
+GENOME_TEXT_DIR = "/root/fsas/ESM-G2V/Data/Example/KO_identifiers/genomo_text"
+
+
+INPUT_SEQUENCE_DIR = RAW_FAA_DIR  
+OUTPUT_EMBEDDING_DIR = "/root/fsas/ESM-G2V/Data/Example/deal_raw_data/faa_embedding"
+W2V_MODEL_DIR = "/root/fsas/ESM-G2V/Data/Example/G2V"
+MERGED_EMBEDDING_DIR = "/root/fsas/ESM-G2V/Data/Example/merge_embedding"
+PREDICTION_OUTPUT_DIR = "/root/fsas/ESM-G2V/Data/Example/predictions"
+
+
+
+rule all:
+    input:
+        expand("{genome_text_dir}/processed_{sample}_output.txt",
+              genome_text_dir=GENOME_TEXT_DIR,
+              sample=[os.path.splitext(f)[0] for f in os.listdir(RAW_GFF_DIR) if f.endswith(".gff")]),
+        PREDICTION_OUTPUT_DIR,
+        os.path.join(W2V_MODEL_DIR, "G2V.w2v")
+
+rule process_gff:
+    input:
+        gff = os.path.join(RAW_GFF_DIR, "{sample}.gff")
+    output:
+        processed = os.path.join(DEAL_GFF_DIR, "{sample}_output.txt")
+    script:
+        "/root/fsas/ESM-G2V/snakemake/deal_gff_data.py"
+
+rule merge_faa:
+    input:
+        faa_files = expand(os.path.join(RAW_FAA_DIR, "{sample}.faa"),
+                         sample=[os.path.splitext(f)[0] for f in os.listdir(RAW_FAA_DIR) if f.endswith(".faa")])
+    output:
+        merged = MERGED_FAA
+    script:
+        "/root/fsas/ESM-G2V/snakemake/merge_faa.py"
+
+rule exec_annotation:
+    input:
+        merged = MERGED_FAA
+    output:
+        annotation = ANNOTATION_RESULT
+    shell:
+        """
+        exec_annotation -o {output.annotation} --cpu 40  \
+        -p /root/fsas/Project/profiles \
+        -k /root/fsas/Project/ko_list \
+        -E 1e-5 {input.merged}
+        """
+
+rule mmseqs_cluster:
+    input:
+        merged = MERGED_FAA
+    output:
+        cluster_result = CLUSTER_RESULT
+    shell:
+        """
+        mmseqs easy-cluster {input.merged} clusterRes tmp \
+        --min-seq-id 0.4 --cov-mode 1
+        """
+
+rule process_cluster:
+    input:
+        cluster_fasta = CLUSTER_RESULT
+    output:
+        cluster_txt = CLUSTER_TXT
+    script:
+        "/root/fsas/ESM-G2V/snakemake/cluster_ID.py"
+
+rule merge_ko_cluster:
+    input:
+        annotation = ANNOTATION_RESULT,
+        cluster_txt = CLUSTER_TXT
+    output:
+        merged_ko = CLUSTER_OUTPUT
+    script:
+        "/root/fsas/ESM-G2V/snakemake/merge_KO_ID.py"
+
+rule generate_genome_text:
+    input:
+        processed_gff = os.path.join(DEAL_GFF_DIR, "{sample}_output.txt"),
+        ko_mapping = CLUSTER_OUTPUT
+    output:
+        genome_text = os.path.join(GENOME_TEXT_DIR, "processed_{sample}_output.txt")
+    script:
+        "/root/fsas/ESM-G2V/snakemake/KO_identifiers.py"
+
+
+rule train_word2vec:
+    input:
+        expand("{genome_text_dir}/processed_{sample}_output.txt",
+              genome_text_dir=GENOME_TEXT_DIR,
+              sample=[os.path.splitext(f)[0] for f in os.listdir(RAW_GFF_DIR) if f.endswith(".gff")])
+    output:
+        w2v_model = os.path.join(W2V_MODEL_DIR, "G2V.w2v")
+    shell:
+        """
+        python /root/fsas/ESM-G2V/snakemake/gene2vec.py \
+            --input '{GENOME_TEXT_DIR}/*.txt' \
+            --output '{W2V_MODEL_DIR}'
+        """
+
+rule extract_embeddings:
+    input:
+        faa_files = expand("{input_dir}/{file}", 
+                         input_dir=INPUT_SEQUENCE_DIR, 
+                         file=[f for f in os.listdir(INPUT_SEQUENCE_DIR) if f.endswith(".faa")])
+    output:
+        output_dir = directory(OUTPUT_EMBEDDING_DIR)
+    shell:
+        """
+        python /root/fsas/ESM-G2V/snakemake/esm.py --input {input.faa_files} --output {output.output_dir}
+        """
+
+rule merge_embeddings:
+    input:
+        pt_folder = OUTPUT_EMBEDDING_DIR,
+        w2v_model = os.path.join(W2V_MODEL_DIR, "G2V.w2v"),
+        mapping_file = CLUSTER_OUTPUT
+    output:
+        merged_files = directory(MERGED_EMBEDDING_DIR)
+    shell:
+        """
+        python /root/fsas/ESM-G2V/snakemake/concat.py \
+            --pt_folder {input.pt_folder} \
+            --w2v_model {input.w2v_model} \
+            --mapping_file {input.mapping_file} \
+            --new_folder {output.merged_files}
+        """
+
+rule predict:
+    input:
+        merged_files = MERGED_EMBEDDING_DIR,
+        model_file = "/root/fsas/ESM-G2V/model/ESM_gene2vec.h5"
+    output:
+        prediction_dir = directory(PREDICTION_OUTPUT_DIR)
+    shell:
+        """
+        python /root/fsas/ESM-G2V/snakemake/predict.py \
+            --input {input.merged_files} \
+            --model {input.model_file} \
+            --output {output.prediction_dir}
+        """
