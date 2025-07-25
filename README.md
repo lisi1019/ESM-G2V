@@ -4,7 +4,7 @@
 
 ## Getting the data
 
-The raw data needed for the experiment is stored in the dataset.
+The raw data needed for the experiment is stored in the Data.
 
 
 ## Setting up the working environment
