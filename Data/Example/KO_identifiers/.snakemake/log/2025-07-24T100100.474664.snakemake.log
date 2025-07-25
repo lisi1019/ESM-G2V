@@ -1,0 +1,2 @@
+SyntaxError in file /root/fsas/ESM-G2V/snakemake/Snakemakefile, line 32:
+Unexpected keyword expand in rule definition (Snakemakefile, line 32)

@@ -1,0 +1,166 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job                     count
+--------------------  -------
+all                         1
+exec_annotation             1
+extract_embeddings          1
+generate_genome_text        1
+merge_embeddings            1
+merge_faa                   1
+merge_ko_cluster            1
+mmseqs_cluster              1
+predict                     1
+process_cluster             1
+process_gff                 1
+train_word2vec              1
+total                      12
+
+Select jobs to execute...
+
+[Thu Jul 24 04:06:52 2025]
+rule merge_faa:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/raw_files/raw_faa/3300036857_7.faa
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/merged.faa
+    jobid: 5
+    reason: Forced execution
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:06:53 2025]
+rule extract_embeddings:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/raw_files/raw_faa/3300036857_7.faa
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/faa_embedding
+    jobid: 10
+    reason: Forced execution
+    resources: tmpdir=/tmp
+
+
+[Thu Jul 24 04:08:01 2025]
+rule process_gff:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/raw_files/raw_gff/3300036857_7.gff
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/deal_raw_gff/3300036857_7_output.txt
+    jobid: 2
+    reason: Forced execution
+    wildcards: sample=3300036857_7
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:08:02 2025]
+Finished job 5.
+1 of 12 steps (8%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:08:02 2025]
+rule mmseqs_cluster:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/merged.faa
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_all_seqs.fasta
+    jobid: 7
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/merged.faa
+    resources: tmpdir=/tmp
+
+
+[Thu Jul 24 04:08:02 2025]
+rule exec_annotation:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/merged.faa
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/ko_annotation.txt
+    jobid: 4
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/merged.faa
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:08:03 2025]
+Finished job 2.
+2 of 12 steps (17%) done
+[Thu Jul 24 04:10:19 2025]
+Finished job 7.
+3 of 12 steps (25%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:10:19 2025]
+rule process_cluster:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_all_seqs.fasta
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_ID.txt
+    jobid: 6
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_all_seqs.fasta
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:10:21 2025]
+Finished job 6.
+4 of 12 steps (33%) done
+[Thu Jul 24 04:15:38 2025]
+Finished job 10.
+5 of 12 steps (42%) done
+[Thu Jul 24 04:23:10 2025]
+Finished job 4.
+6 of 12 steps (50%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:23:10 2025]
+rule merge_ko_cluster:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/ko_annotation.txt, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_ID.txt
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_mapping.txt
+    jobid: 3
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/ko_annotation.txt, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_ID.txt
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:23:11 2025]
+Finished job 3.
+7 of 12 steps (58%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:23:11 2025]
+rule generate_genome_text:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/deal_raw_gff/3300036857_7_output.txt, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_mapping.txt
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/genomo_text/processed_3300036857_7_output.txt
+    jobid: 1
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_mapping.txt, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/deal_raw_gff/3300036857_7_output.txt
+    wildcards: sample=3300036857_7
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:23:13 2025]
+Finished job 1.
+8 of 12 steps (67%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:23:13 2025]
+rule train_word2vec:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/genomo_text/processed_3300036857_7_output.txt
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/G2V/G2V.w2v
+    jobid: 11
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/genomo_text/processed_3300036857_7_output.txt
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:23:15 2025]
+Finished job 11.
+9 of 12 steps (75%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:23:16 2025]
+rule merge_embeddings:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/faa_embedding, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/G2V/G2V.w2v, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_mapping.txt
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/merge_embedding
+    jobid: 9
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/G2V/G2V.w2v, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/KO_identifiers/clusterRes_mapping.txt, /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/deal_raw_data/faa_embedding
+    resources: tmpdir=/tmp
+
+[Thu Jul 24 04:23:35 2025]
+Finished job 9.
+10 of 12 steps (83%) done
+Select jobs to execute...
+
+[Thu Jul 24 04:23:35 2025]
+rule predict:
+    input: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/merge_embedding, /root/fsas/Project/ESM-G2V/model/ESM_gene2vec.h5
+    output: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/predictions
+    jobid: 8
+    reason: Input files updated by another job: /root/fsas/Project/ESM-G2V/Example_Data/Metagenome/merge_embedding
+    resources: tmpdir=/tmp
+
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule predict in file /root/fsas/Project/ESM-G2V/snakemake/Snakemakefile, line 150:
+Job 8  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+/root/fsas/Project/ESM-G2V/Example_Data/Metagenome/predictions
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2025-07-24T040652.253503.snakemake.log
