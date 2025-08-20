@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument('--new_folder', default='/root/fsas/ESM-G2V/Data/Example/merge_embedding', help='Path to the output folder')
     args = parser.parse_args()
 
-    # 验证输入路径
+   
     if not os.path.isdir(args.pt_folder):
         raise ValueError(f"PT folder does not exist: {args.pt_folder}")
     if not os.path.isfile(args.w2v_model):
