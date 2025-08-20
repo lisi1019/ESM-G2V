@@ -289,7 +289,7 @@ class NNClf(Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.name = "DNN"
-        self.clf = None  # 初始化分类器为 None
+        self.clf = None 
     
 
 
@@ -369,7 +369,7 @@ class NNClfFolds(FoldsModel):
         ])
         early_stopping = EarlyStopping(
         monitor='val_loss',
-        patience=10,  # 如果验证损失在10个轮次内没有改善，就停止训练
+        patience=10,  
         restore_best_weights=True
     )
         optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001)
@@ -436,7 +436,7 @@ class NNClfCVFolds(CVFoldsModel):
         ])
         early_stopping = EarlyStopping(
         monitor='val_loss',
-        patience=10,  # 如果验证损失在10个轮次内没有改善，就停止训练
+        patience=10, 
         restore_best_weights=True
     )
         optimizer = tf.keras.optimizers.Adam(learning_rate=0.00001)
