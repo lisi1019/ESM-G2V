@@ -81,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument('--workers', required=False, type=int, help='number of processes')
     parser.add_argument('--epochs', default=5, type=int, help='number of epochs')
     parser.add_argument('--minTF', default=4, type=int, help='minimum term frequency')
-    parser.add_argument('--sample', default=1e-3, type=float, help='down sampling setting for frequent words')  # 修改为 float
+    parser.add_argument('--sample', default=1e-3, type=float, help='down sampling setting for frequent words')  
     parser.add_argument('--model', required=False, type=str, help='model file if exists')
     parser.add_argument('--input', default='/root/fsas/ESM-G2V/Data/Example/KO_identifiers/genomo_text/*.txt',
                         type=str, help='dir to learn from, as a regex for file generation')
